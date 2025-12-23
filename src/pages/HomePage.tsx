@@ -1,24 +1,36 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getStudents } from '../api/auth';
+import { getCourses } from '../api/courses';
 import type { Student } from '../api/auth';
+import type { CourseListItem } from '../api/courses';
 import Logo from '../components/Logo';
+import ProgressBar from '../components/ProgressBar';
 
 export default function HomePage() {
   const { user, token, logout } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const isTeacher = user?.role === 'TEACHER';
 
   useEffect(() => {
-    if (isTeacher && token) {
+    if (token) {
       setIsLoading(true);
-      getStudents(token)
-        .then(setStudents)
-        .catch((err) => setError(err.message))
-        .finally(() => setIsLoading(false));
+      if (isTeacher) {
+        getStudents(token)
+          .then(setStudents)
+          .catch((err) => setError(err.message))
+          .finally(() => setIsLoading(false));
+      } else {
+        getCourses(token)
+          .then(setCourses)
+          .catch((err) => setError(err.message))
+          .finally(() => setIsLoading(false));
+      }
     }
   }, [isTeacher, token]);
 
@@ -30,6 +42,10 @@ export default function HomePage() {
     <div className="home-page">
       <header className="home-header">
         <Logo />
+        <nav className="header-nav">
+          <Link to="/" className="nav-link active">Domů</Link>
+          {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
+        </nav>
         <div className="user-info">
           <span>{isTeacher ? 'Učitel' : 'Žák'}</span>
           <button onClick={logout} className="btn-secondary">
@@ -42,14 +58,14 @@ export default function HomePage() {
         <h2>Vítejte v KodLabu!</h2>
         <p>Platforma pro výuku programování a digitální gramotnosti.</p>
 
+        {error && <div className="error-message">{error}</div>}
+
         {isTeacher ? (
           <div className="students-section">
             <h3>
               Moji žáci
               <span className="student-count">({students.length})</span>
             </h3>
-
-            {error && <div className="error-message">{error}</div>}
 
             {isLoading ? (
               <p>Načítání...</p>
@@ -72,8 +88,40 @@ export default function HomePage() {
             )}
           </div>
         ) : (
-          <div className="placeholder-card">
-            <p>Kurzy budou brzy k dispozici.</p>
+          <div className="courses-section">
+            <h3>Moje kurzy</h3>
+
+            {isLoading ? (
+              <p>Načítání...</p>
+            ) : courses.length === 0 ? (
+              <div className="empty-state">
+                <p>Zatím nemáte přiřazené žádné kurzy.</p>
+                <p>Váš učitel vám brzy přiřadí kurzy k výuce.</p>
+              </div>
+            ) : (
+              <div className="course-list">
+                {courses.map((course) => (
+                  <Link
+                    key={course.id}
+                    to={`/kurzy/${course.id}`}
+                    className="course-card course-card-link"
+                  >
+                    <div className="course-card-header">
+                      <h4>{course.title}</h4>
+                    </div>
+                    {course.description && (
+                      <p className="course-card-desc">{course.description}</p>
+                    )}
+                    <div className="course-card-progress">
+                      <ProgressBar
+                        completed={course.completedLessons}
+                        total={course.totalLessons}
+                      />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
