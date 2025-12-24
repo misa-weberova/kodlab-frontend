@@ -80,6 +80,7 @@ export default function CourseDetailPage() {
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
+          {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
         </nav>
         <div className="user-info">

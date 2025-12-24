@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getCourses, assignCourse, unassignCourse } from '../api/courses';
+import { getCourses, getAssignedGroups, assignCourseToGroup, unassignCourseFromGroup } from '../api/courses';
+import { getGroups } from '../api/groups';
 import type { CourseListItem } from '../api/courses';
+import type { Group } from '../api/groups';
 import Logo from '../components/Logo';
 import ProgressBar from '../components/ProgressBar';
 
 export default function CoursesPage() {
   const { user, token, logout } = useAuth();
   const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [assignedGroups, setAssignedGroups] = useState<Map<number, number[]>>(new Map());
+  const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -16,16 +21,28 @@ export default function CoursesPage() {
 
   useEffect(() => {
     if (token) {
-      loadCourses();
+      loadData();
     }
   }, [token]);
 
-  const loadCourses = async () => {
+  const loadData = async () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const data = await getCourses(token);
-      setCourses(data);
+      const coursesData = await getCourses(token);
+      setCourses(coursesData);
+
+      if (isTeacher) {
+        const groupsData = await getGroups(token);
+        setGroups(groupsData);
+
+        const assignedMap = new Map<number, number[]>();
+        for (const course of coursesData) {
+          const groupIds = await getAssignedGroups(token, course.id);
+          assignedMap.set(course.id, groupIds);
+        }
+        setAssignedGroups(assignedMap);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Chyba při načítání');
     } finally {
@@ -33,18 +50,32 @@ export default function CoursesPage() {
     }
   };
 
-  const handleAssignToggle = async (course: CourseListItem) => {
+  const handleToggleGroup = async (courseId: number, groupId: number) => {
     if (!token) return;
     try {
-      if (course.assigned) {
-        await unassignCourse(token, course.id);
+      const currentGroups = assignedGroups.get(courseId) || [];
+      if (currentGroups.includes(groupId)) {
+        await unassignCourseFromGroup(token, courseId, groupId);
+        setAssignedGroups(prev => {
+          const newMap = new Map(prev);
+          newMap.set(courseId, currentGroups.filter(id => id !== groupId));
+          return newMap;
+        });
       } else {
-        await assignCourse(token, course.id);
+        await assignCourseToGroup(token, courseId, groupId);
+        setAssignedGroups(prev => {
+          const newMap = new Map(prev);
+          newMap.set(courseId, [...currentGroups, groupId]);
+          return newMap;
+        });
       }
-      loadCourses();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Chyba');
+      setError(err instanceof Error ? err.message : 'Chyba při přiřazování');
     }
+  };
+
+  const getAssignedCount = (courseId: number) => {
+    return assignedGroups.get(courseId)?.length || 0;
   };
 
   return (
@@ -53,6 +84,7 @@ export default function CoursesPage() {
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
+          {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           <Link to="/kurzy" className="nav-link active">Kurzy</Link>
         </nav>
         <div className="user-info">
@@ -67,8 +99,8 @@ export default function CoursesPage() {
         <h2>Kurzy</h2>
         <p>
           {isTeacher
-            ? 'Přiřaďte kurzy svým žákům kliknutím na tlačítko.'
-            : 'Zde najdete kurzy přiřazené vaší třídou.'}
+            ? 'Přiřaďte kurzy skupinám kliknutím na tlačítko "Přiřadit skupinám".'
+            : 'Zde najdete kurzy přiřazené vaší skupině.'}
         </p>
 
         {error && <div className="error-message">{error}</div>}
@@ -88,14 +120,40 @@ export default function CoursesPage() {
                   <h3>{course.title}</h3>
                   {isTeacher && (
                     <button
-                      className={`assign-btn ${course.assigned ? 'assigned' : 'unassigned'}`}
-                      onClick={() => handleAssignToggle(course)}
+                      className={`assign-btn ${getAssignedCount(course.id) > 0 ? 'assigned' : 'unassigned'}`}
+                      onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
                     >
-                      {course.assigned ? 'Přiřazeno' : 'Přiřadit'}
+                      {getAssignedCount(course.id) > 0
+                        ? `Přiřazeno (${getAssignedCount(course.id)})`
+                        : 'Přiřadit skupinám'}
                     </button>
                   )}
                 </div>
                 {course.description && <p>{course.description}</p>}
+
+                {isTeacher && expandedCourse === course.id && (
+                  <div className="group-assignment-panel">
+                    {groups.length === 0 ? (
+                      <p className="no-groups-hint">
+                        Nejprve vytvořte skupiny v sekci <Link to="/skupiny">Skupiny</Link>.
+                      </p>
+                    ) : (
+                      <div className="group-checkboxes">
+                        {groups.map((group) => (
+                          <label key={group.id} className="group-checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={(assignedGroups.get(course.id) || []).includes(group.id)}
+                              onChange={() => handleToggleGroup(course.id, group.id)}
+                            />
+                            <span>{group.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="course-card-footer">
                   {!isTeacher && (
                     <ProgressBar
@@ -110,11 +168,6 @@ export default function CoursesPage() {
                     <Link to={`/kurzy/${course.id}`} className="btn-secondary">
                       Zobrazit
                     </Link>
-                    {isTeacher && course.assigned && (
-                      <Link to={`/kurzy/${course.id}/pokrok`} className="btn-secondary">
-                        Pokrok žáků
-                      </Link>
-                    )}
                   </div>
                 </div>
               </div>

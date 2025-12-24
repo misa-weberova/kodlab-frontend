@@ -3,10 +3,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import GroupsPage from './pages/GroupsPage';
+import GroupDetailPage from './pages/GroupDetailPage';
 import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import LessonPage from './pages/LessonPage';
-import CourseProgressPage from './pages/CourseProgressPage';
 import './App.css';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -41,6 +42,22 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/skupiny"
+        element={
+          <PrivateRoute>
+            <GroupsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/skupiny/:id"
+        element={
+          <PrivateRoute>
+            <GroupDetailPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/kurzy"
         element={
           <PrivateRoute>
@@ -53,14 +70,6 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <CourseDetailPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/kurzy/:id/pokrok"
-        element={
-          <PrivateRoute>
-            <CourseProgressPage />
           </PrivateRoute>
         }
       />

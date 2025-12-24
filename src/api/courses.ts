@@ -105,24 +105,32 @@ export async function getLessonDetail(token: string, lessonId: number): Promise<
   return response.json();
 }
 
-export async function assignCourse(token: string, courseId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/api/courses/${courseId}/assign`, {
+export async function assignCourseToGroup(token: string, courseId: number, groupId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/api/courses/${courseId}/assign/${groupId}`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Nepodařilo se přiřadit kurz');
 }
 
-export async function unassignCourse(token: string, courseId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/api/courses/${courseId}/assign`, {
+export async function unassignCourseFromGroup(token: string, courseId: number, groupId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/api/courses/${courseId}/assign/${groupId}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Nepodařilo se odebrat kurz');
 }
 
-export async function getCourseProgress(token: string, courseId: number): Promise<StudentProgress[]> {
-  const response = await fetch(`${API_URL}/api/courses/${courseId}/progress`, {
+export async function getAssignedGroups(token: string, courseId: number): Promise<number[]> {
+  const response = await fetch(`${API_URL}/api/courses/${courseId}/groups`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Nepodařilo se načíst přiřazené skupiny');
+  return response.json();
+}
+
+export async function getCourseProgressForGroup(token: string, courseId: number, groupId: number): Promise<StudentProgress[]> {
+  const response = await fetch(`${API_URL}/api/courses/${courseId}/progress/${groupId}`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Nepodařilo se načíst pokrok studentů');
