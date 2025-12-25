@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getLessonDetail, markLessonComplete } from '../api/courses';
 import type { LessonDetail } from '../api/courses';
 import Logo from '../components/Logo';
+import CodeEditor from '../components/CodeEditor';
 
 export default function LessonPage() {
   const { id } = useParams<{ id: string }>();
@@ -92,6 +93,8 @@ export default function LessonPage() {
                 <p className="empty-content">Tato lekce zatím nemá obsah.</p>
               )}
             </div>
+
+            <CodeEditor />
 
             <div className="lesson-nav">
               <div className="nav-left">
