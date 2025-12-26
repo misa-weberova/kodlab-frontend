@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
@@ -17,7 +18,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     return <div className="loading">Načítání...</div>;
   }
 
-  return user ? <>{children}</> : <Navigate to="/prihlaseni" />;
+  return user ? <>{children}</> : <Navigate to="/vitejte" />;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
@@ -30,15 +31,26 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return user ? <Navigate to="/" /> : <>{children}</>;
 }
 
+function RootRoute() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="loading">Načítání...</div>;
+  }
+
+  return user ? <HomePage /> : <LandingPage />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<RootRoute />} />
       <Route
-        path="/"
+        path="/vitejte"
         element={
-          <PrivateRoute>
-            <HomePage />
-          </PrivateRoute>
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
         }
       />
       <Route

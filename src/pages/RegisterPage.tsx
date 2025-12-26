@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register as apiRegister } from '../api/auth';
 import Logo from '../components/Logo';
+import FloatingShapes from '../components/FloatingShapes';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -74,6 +75,7 @@ export default function RegisterPage() {
   if (successInfo) {
     return (
       <div className="auth-page">
+        <FloatingShapes />
         <div className="auth-card">
           <Logo size="large" />
           <h1>Registrace dokončena!</h1>
@@ -93,6 +95,7 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <FloatingShapes />
       <div className="auth-card">
         <Logo size="large" />
         <h1>Registrace</h1>

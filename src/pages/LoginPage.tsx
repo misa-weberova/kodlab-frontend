@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { login as apiLogin } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
+import FloatingShapes from '../components/FloatingShapes';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,6 +33,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <FloatingShapes />
       <div className="auth-card">
         <Logo size="large" />
         <h1>Přihlášení</h1>
