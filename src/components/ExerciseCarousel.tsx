@@ -1,4 +1,4 @@
-import { useState, useCallback, Children, cloneElement, isValidElement } from 'react';
+import { useState, useCallback, useRef, Children, cloneElement, isValidElement } from 'react';
 import type { ReactElement } from 'react';
 
 interface ExerciseInfo {
@@ -21,7 +21,9 @@ export default function ExerciseCarousel({
   const childArray = Children.toArray(children).filter(isValidElement);
   const exerciseCount = childArray.length;
 
+  const exerciseRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const [exercises, setExercises] = useState<ExerciseInfo[]>(() =>
     childArray.map((_, index) => ({
       title: titles?.[index] || `Cvičení ${index + 1}`,
@@ -58,21 +60,36 @@ export default function ExerciseCarousel({
     }
   }, [exerciseCount, onAllComplete]);
 
+  // Scroll to exercise area
+  const scrollToExercise = () => {
+    if (exerciseRef.current) {
+      exerciseRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Navigation
   const goToPrevious = () => {
     if (currentIndex > 0) {
+      setSlideDirection('left');
       setCurrentIndex(currentIndex - 1);
+      setTimeout(scrollToExercise, 50);
     }
   };
 
   const goToNext = () => {
     if (currentIndex < exerciseCount - 1) {
+      setSlideDirection('right');
       setCurrentIndex(currentIndex + 1);
+      setTimeout(scrollToExercise, 50);
     }
   };
 
   const goToExercise = (index: number) => {
-    setCurrentIndex(index);
+    if (index !== currentIndex) {
+      setSlideDirection(index > currentIndex ? 'right' : 'left');
+      setCurrentIndex(index);
+      setTimeout(scrollToExercise, 50);
+    }
   };
 
   // Calculate overall progress
@@ -99,7 +116,7 @@ export default function ExerciseCarousel({
   };
 
   return (
-    <div className="exercise-carousel">
+    <div className="exercise-carousel" ref={exerciseRef}>
       {/* Progress Header */}
       <div className="carousel-progress-header">
         <div className="carousel-progress-bar">
@@ -140,7 +157,12 @@ export default function ExerciseCarousel({
         </button>
 
         <div className="carousel-exercise">
-          {renderCurrentExercise()}
+          <div
+            key={currentIndex}
+            className={`carousel-exercise-content ${slideDirection === 'left' ? 'slide-left' : ''}`}
+          >
+            {renderCurrentExercise()}
+          </div>
           {/* Footer with navigation info */}
           <div className="carousel-footer">
             <span className="carousel-counter">

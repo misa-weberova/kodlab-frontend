@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getLessonDetail, markLessonComplete } from '../api/courses';
-import type { LessonDetail } from '../api/courses';
+import type { LessonDetail, ExerciseData } from '../api/courses';
 import Logo from '../components/Logo';
 import CodeEditor from '../components/CodeEditor';
 import MatchingExercise from '../components/MatchingExercise';
@@ -12,59 +12,116 @@ import SortingExercise from '../components/SortingExercise';
 import CategorySortExercise from '../components/CategorySortExercise';
 import ExerciseCarousel from '../components/ExerciseCarousel';
 
-// Demo data for the crossword - valid intersecting words
-// Grid layout:
-//     0   1   2   3   4
-// 0   P   R   I   N   T
-// 1   Y
-// 2   T   R   U   E
-// 3   H
-// 4   O
-// 5   N
-const demoCrosswordWords = [
-  { id: '1', word: 'PRINT', clue: 'Příkaz pro výpis textu na obrazovku', row: 0, col: 0, direction: 'across' as const },
-  { id: '2', word: 'PYTHON', clue: 'Populární programovací jazyk pro začátečníky', row: 0, col: 0, direction: 'down' as const },
-  { id: '3', word: 'TRUE', clue: 'Logická hodnota "pravda"', row: 2, col: 0, direction: 'across' as const },
-  { id: '4', word: 'INPUT', clue: 'Příkaz pro vstup od uživatele', row: 0, col: 2, direction: 'down' as const },
-];
+// Parse exercise config safely
+function parseConfig(configStr: string | null): Record<string, unknown> {
+  if (!configStr) return {};
+  try {
+    return JSON.parse(configStr);
+  } catch {
+    return {};
+  }
+}
 
-// Demo data for the category sort exercise
-const demoCategoryBoxes = [
-  { id: 'hardware', title: 'Hardware', color: 'teal' },
-  { id: 'software', title: 'Software', color: 'orange' },
-  { id: 'data', title: 'Data', color: 'indigo' },
-];
-const demoCategoryItems = [
-  { id: '1', text: 'Procesor', correctCategoryId: 'hardware' },
-  { id: '2', text: 'Operační systém', correctCategoryId: 'software' },
-  { id: '3', text: 'Obrázek', correctCategoryId: 'data' },
-  { id: '4', text: 'Monitor', correctCategoryId: 'hardware' },
-  { id: '5', text: 'Webový prohlížeč', correctCategoryId: 'software' },
-  { id: '6', text: 'Textový dokument', correctCategoryId: 'data' },
-  { id: '7', text: 'Klávesnice', correctCategoryId: 'hardware' },
-  { id: '8', text: 'Antivirový program', correctCategoryId: 'software' },
-  { id: '9', text: 'Video', correctCategoryId: 'data' },
-];
+// Render an exercise based on its type
+function renderExercise(exercise: ExerciseData): React.ReactNode {
+  const config = parseConfig(exercise.config);
 
-// Demo data for the sorting exercise - data types by size (smallest to largest)
-const demoSortingItems = [
-  { id: 'bit', text: 'bit', displayValue: '1 bit' },
-  { id: 'byte', text: 'byte', displayValue: '8 bitů' },
-  { id: 'kb', text: 'kilobyte (KB)', displayValue: '1 024 B' },
-  { id: 'mb', text: 'megabyte (MB)', displayValue: '1 024 KB' },
-  { id: 'gb', text: 'gigabyte (GB)', displayValue: '1 024 MB' },
-];
-// Correct order from smallest to largest
-const demoSortingOrder = ['bit', 'byte', 'kb', 'mb', 'gb'];
+  switch (exercise.type) {
+    case 'CODE':
+      return (
+        <CodeEditor
+          key={exercise.id}
+          title={exercise.title || 'Naprogramuj'}
+          instruction={exercise.instruction || 'Napiš kód podle zadání.'}
+          task={exercise.instruction || 'Napiš program.'}
+          expectedOutput={(config.expectedOutput as string) || ''}
+          initialCode={(config.initialCode as string) || '# Napiš svůj kód zde\n'}
+        />
+      );
 
-// Demo data for the matching exercise
-const demoMatchingPairs = [
-  { id: '1', left: 'print()', right: 'Výpis na obrazovku' },
-  { id: '2', left: 'input()', right: 'Vstup od uživatele' },
-  { id: '3', left: 'for', right: 'Cyklus' },
-  { id: '4', left: 'if', right: 'Podmínka' },
-  { id: '5', left: 'def', right: 'Definice funkce' },
-];
+    case 'MATCHING':
+      return (
+        <MatchingExercise
+          key={exercise.id}
+          pairs={(config.pairs as { id: string; left: string; right: string }[]) || []}
+          title={exercise.title || 'Spoj páry'}
+          instruction={exercise.instruction || 'Spoj odpovídající položky.'}
+        />
+      );
+
+    case 'GAPFILL':
+      return (
+        <GapFillExercise
+          key={exercise.id}
+          sentence={(config.sentence as string) || ''}
+          answers={(config.answers as string[]) || []}
+          distractors={(config.distractors as string[]) || []}
+          title={exercise.title || 'Doplň slova'}
+          instruction={exercise.instruction || 'Doplň chybějící slova.'}
+        />
+      );
+
+    case 'CROSSWORD':
+      return (
+        <CrosswordExercise
+          key={exercise.id}
+          words={
+            (config.words as {
+              id: string;
+              word: string;
+              clue: string;
+              row: number;
+              col: number;
+              direction: 'across' | 'down';
+            }[]) || []
+          }
+          title={exercise.title || 'Křížovka'}
+          instruction={exercise.instruction || 'Vyplň křížovku podle nápověd.'}
+        />
+      );
+
+    case 'SORTING':
+      return (
+        <SortingExercise
+          key={exercise.id}
+          items={
+            (config.items as { id: string; text: string; displayValue?: string }[]) || []
+          }
+          correctOrder={(config.correctOrder as string[]) || []}
+          title={exercise.title || 'Seřaď položky'}
+          instruction={exercise.instruction || 'Seřaď položky ve správném pořadí.'}
+          startLabel={(config.startLabel as string) || undefined}
+          endLabel={(config.endLabel as string) || undefined}
+        />
+      );
+
+    case 'CATEGORY':
+      return (
+        <CategorySortExercise
+          key={exercise.id}
+          categories={
+            (config.categories as { id: string; title: string; color?: string }[]) || []
+          }
+          items={
+            (config.categoryItems as {
+              id: string;
+              text: string;
+              correctCategoryId: string;
+            }[]) || []
+          }
+          title={exercise.title || 'Roztřiď do kategorií'}
+          instruction={exercise.instruction || 'Roztřiď položky do správných kategorií.'}
+        />
+      );
+
+    default:
+      return (
+        <div key={exercise.id} className="unknown-exercise">
+          <p>Neznámý typ cvičení: {exercise.type}</p>
+        </div>
+      );
+  }
+}
 
 export default function LessonPage() {
   const { id } = useParams<{ id: string }>();
@@ -76,6 +133,7 @@ export default function LessonPage() {
   const [isCompleting, setIsCompleting] = useState(false);
 
   const isTeacher = user?.role === 'TEACHER';
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     if (token && id) {
@@ -112,6 +170,15 @@ export default function LessonPage() {
     }
   };
 
+  // Memoize exercise titles for the carousel
+  const exerciseTitles = useMemo(() => {
+    if (!lesson) return ['Obsah lekce'];
+    return [
+      'Obsah lekce',
+      ...lesson.exercises.map((ex) => ex.title || getDefaultTitle(ex.type)),
+    ];
+  }, [lesson]);
+
   return (
     <div className="home-page">
       <header className="home-header">
@@ -120,9 +187,10 @@ export default function LessonPage() {
           <Link to="/" className="nav-link">Domů</Link>
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
+          {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}
         </nav>
         <div className="user-info">
-          <span>{isTeacher ? 'Učitel' : 'Žák'}</span>
+          <span>{isAdmin ? 'Admin' : isTeacher ? 'Učitel' : 'Žák'}</span>
           <button onClick={logout} className="btn-secondary">
             Odhlásit se
           </button>
@@ -143,15 +211,7 @@ export default function LessonPage() {
             </div>
 
             <ExerciseCarousel
-              titles={[
-                'Obsah lekce',
-                'Napiš kód',
-                'Spoj příkazy',
-                'Doplň slova',
-                'Křížovka',
-                'Seřaď jednotky',
-                'Roztřiď pojmy',
-              ]}
+              titles={exerciseTitles}
               onAllComplete={(totalScore, totalPossible) => {
                 console.log(`Všechna cvičení dokončena! Skóre: ${totalScore}/${totalPossible}`);
               }}
@@ -171,64 +231,22 @@ export default function LessonPage() {
                   ) : (
                     <div className="lesson-placeholder">
                       <h4>Vítej v lekci!</h4>
-                      <p>V této lekci se naučíš základy programování v Pythonu.</p>
-                      <ul>
-                        <li><strong>print()</strong> - příkaz pro výpis textu na obrazovku</li>
-                        <li><strong>input()</strong> - příkaz pro získání vstupu od uživatele</li>
-                        <li><strong>proměnné</strong> - místa pro ukládání dat</li>
-                      </ul>
+                      <p>Obsah lekce zatím nebyl přidán.</p>
                       <p>Až si přečteš obsah, klikni na šipku vpravo nebo vyber další cvičení nahoře.</p>
                     </div>
                   )}
                 </div>
                 <div className="lesson-content-footer">
-                  <span className="lesson-content-hint">Pokračuj na další cvičení →</span>
+                  {lesson.exercises.length > 0 ? (
+                    <span className="lesson-content-hint">Pokračuj na další cvičení →</span>
+                  ) : (
+                    <span className="lesson-content-hint">Tato lekce nemá žádná cvičení.</span>
+                  )}
                 </div>
               </div>
 
-              <CodeEditor
-                title="Tvůj první program"
-                instruction="Napiš kód v Pythonu, který vypíše pozdrav."
-                task="Napiš program, který vypíše 'Ahoj, světe!' na obrazovku."
-                expectedOutput="Ahoj, světe!"
-                initialCode="# Napiš svůj kód zde\n"
-              />
-
-              <MatchingExercise
-                pairs={demoMatchingPairs}
-                title="Spoj příkazy s jejich významem"
-                instruction="Klikni na příkaz vlevo a pak na jeho význam vpravo."
-              />
-
-              <GapFillExercise
-                sentence="Příkaz ___ slouží k vypsání textu na obrazovku. Pro získání vstupu od uživatele použijeme ___."
-                answers={['print()', 'input()']}
-                distractors={['for', 'while']}
-                title="Doplň správná slova"
-                instruction="Vyber slovo z nabídky a klikni na mezeru, kam patří."
-              />
-
-              <CrosswordExercise
-                words={demoCrosswordWords}
-                title="Programátorská křížovka"
-                instruction="Vyplň křížovku podle nápověd. Klikni na políčko a piš."
-              />
-
-              <SortingExercise
-                items={demoSortingItems}
-                correctOrder={demoSortingOrder}
-                title="Seřaď jednotky podle velikosti"
-                instruction="Seřaď datové jednotky od nejmenší po největší. Přetáhni položky nebo použij šipky."
-                startLabel="Nejmenší"
-                endLabel="Největší"
-              />
-
-              <CategorySortExercise
-                categories={demoCategoryBoxes}
-                items={demoCategoryItems}
-                title="Roztřiď pojmy do kategorií"
-                instruction="Přetáhni každou položku do správné kategorie."
-              />
+              {/* Render exercises dynamically */}
+              {lesson.exercises.map((exercise) => renderExercise(exercise))}
             </ExerciseCarousel>
 
             <div className="lesson-nav">
@@ -240,7 +258,7 @@ export default function LessonPage() {
                 )}
               </div>
               <div className="nav-center">
-                {!isTeacher && !lesson.completed && (
+                {!isTeacher && !isAdmin && !lesson.completed && (
                   <button
                     className="btn-primary"
                     onClick={handleComplete}
@@ -249,7 +267,7 @@ export default function LessonPage() {
                     {isCompleting ? 'Ukládání...' : 'Označit jako dokončené'}
                   </button>
                 )}
-                {!isTeacher && lesson.completed && (
+                {!isTeacher && !isAdmin && lesson.completed && (
                   <span className="completed-badge">✓ Dokončeno</span>
                 )}
               </div>
@@ -266,4 +284,24 @@ export default function LessonPage() {
       </main>
     </div>
   );
+}
+
+// Helper function to get default title based on exercise type
+function getDefaultTitle(type: string): string {
+  switch (type) {
+    case 'CODE':
+      return 'Programování';
+    case 'MATCHING':
+      return 'Spojování';
+    case 'GAPFILL':
+      return 'Doplňování';
+    case 'CROSSWORD':
+      return 'Křížovka';
+    case 'SORTING':
+      return 'Řazení';
+    case 'CATEGORY':
+      return 'Třídění';
+    default:
+      return 'Cvičení';
+  }
 }

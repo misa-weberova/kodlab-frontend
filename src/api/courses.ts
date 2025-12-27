@@ -30,6 +30,15 @@ export interface CourseDetail {
   chapters: ChapterSummary[];
 }
 
+export interface ExerciseData {
+  id: number;
+  type: string;
+  title: string | null;
+  instruction: string | null;
+  config: string | null;
+  ordering: number;
+}
+
 export interface LessonDetail {
   id: number;
   title: string;
@@ -41,6 +50,7 @@ export interface LessonDetail {
   completed: boolean;
   prevLessonId: number | null;
   nextLessonId: number | null;
+  exercises: ExerciseData[];
 }
 
 export interface LessonProgressDto {

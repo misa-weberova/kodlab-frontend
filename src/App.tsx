@@ -9,6 +9,9 @@ import GroupDetailPage from './pages/GroupDetailPage';
 import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import LessonPage from './pages/LessonPage';
+import AdminPage from './pages/AdminPage';
+import AdminCourseEditor from './pages/AdminCourseEditor';
+import AdminLessonEditor from './pages/AdminLessonEditor';
 import './App.css';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -107,6 +110,30 @@ function AppRoutes() {
           <PublicRoute>
             <RegisterPage />
           </PublicRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute>
+            <AdminPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/kurzy/:id"
+        element={
+          <PrivateRoute>
+            <AdminCourseEditor />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/lekce/:id"
+        element={
+          <PrivateRoute>
+            <AdminLessonEditor />
+          </PrivateRoute>
         }
       />
       <Route path="*" element={<Navigate to="/" />} />

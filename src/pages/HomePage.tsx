@@ -16,6 +16,7 @@ export default function HomePage() {
   const [error, setError] = useState('');
 
   const isTeacher = user?.role === 'TEACHER';
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     if (token) {
@@ -46,9 +47,10 @@ export default function HomePage() {
           <Link to="/" className="nav-link active">Domů</Link>
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
+          {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}
         </nav>
         <div className="user-info">
-          <span>{isTeacher ? 'Učitel' : 'Žák'}</span>
+          <span>{isAdmin ? 'Admin' : isTeacher ? 'Učitel' : 'Žák'}</span>
           <button onClick={logout} className="btn-secondary">
             Odhlásit se
           </button>
