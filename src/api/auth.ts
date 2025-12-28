@@ -9,6 +9,7 @@ export interface LoginResponse {
   token: string;
   userId: number;
   role: string;
+  avatar: string | null;
 }
 
 export interface RegisterRequest {
@@ -81,6 +82,30 @@ export async function getStudents(token: string): Promise<Student[]> {
       throw new Error('Pouze učitelé mohou zobrazit žáky');
     }
     throw new Error('Nepodařilo se načíst žáky');
+  }
+
+  return response.json();
+}
+
+export interface UserProfile {
+  id: number;
+  email: string;
+  role: string;
+  avatar: string | null;
+}
+
+export async function updateAvatar(token: string, avatar: string): Promise<UserProfile> {
+  const response = await fetch(`${API_URL}/api/users/me/avatar`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ avatar }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Nepodařilo se uložit avatar');
   }
 
   return response.json();

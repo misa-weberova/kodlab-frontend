@@ -162,3 +162,112 @@ export async function getMyProgress(token: string): Promise<MyProgress> {
   if (!response.ok) throw new Error('Nepodařilo se načíst pokrok');
   return response.json();
 }
+
+// Dashboard types
+export interface DashboardStudentSummary {
+  studentId: number;
+  studentEmail: string;
+  studentAvatar: string | null;
+  totalExercises: number;
+  completedExercises: number;
+  overallScorePercent: number;
+  completionPercent: number;
+  lastActivity: string | null;
+}
+
+export interface DashboardExerciseStats {
+  exerciseId: number;
+  exerciseTitle: string;
+  exerciseType: string;
+  lessonId: number;
+  lessonTitle: string;
+  chapterId: number;
+  chapterTitle: string;
+  averageScore: number;
+  completionCount: number;
+  totalStudents: number;
+  completionRate: number;
+}
+
+export interface DashboardOverview {
+  groupId: number;
+  groupName: string;
+  studentCount: number;
+  totalExercises: number;
+  groupAverageScore: number;
+  groupCompletionRate: number;
+  students: DashboardStudentSummary[];
+  hardestExercises: DashboardExerciseStats[];
+}
+
+export interface ExerciseProgressDetail {
+  exerciseId: number;
+  exerciseTitle: string;
+  exerciseType: string;
+  lessonId: number;
+  lessonTitle: string;
+  score: number | null;
+  maxScore: number | null;
+  scorePercent: number;
+  attempts: number | null;
+  completedAt: string | null;
+}
+
+export interface CourseProgressDetail {
+  courseId: number;
+  courseTitle: string;
+  totalExercises: number;
+  completedExercises: number;
+  averageScore: number;
+  exercises: ExerciseProgressDetail[];
+}
+
+export interface StudentDetail {
+  studentId: number;
+  studentEmail: string;
+  studentAvatar: string | null;
+  overallScore: number;
+  overallCompletion: number;
+  lastActivity: string | null;
+  courses: CourseProgressDetail[];
+}
+
+// Dashboard API functions
+export async function submitExerciseProgress(
+  token: string,
+  exerciseId: number,
+  score: number,
+  maxScore: number
+): Promise<void> {
+  const response = await fetch(`${API_URL}/api/exercises/${exerciseId}/progress`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ score, maxScore }),
+  });
+  if (!response.ok) throw new Error('Nepodařilo se uložit pokrok');
+}
+
+export async function getDashboardOverview(
+  token: string,
+  groupId: number
+): Promise<DashboardOverview> {
+  const response = await fetch(`${API_URL}/api/dashboard/groups/${groupId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Nepodařilo se načíst přehled');
+  return response.json();
+}
+
+export async function getStudentDetail(
+  token: string,
+  studentId: number
+): Promise<StudentDetail> {
+  const response = await fetch(`${API_URL}/api/dashboard/students/${studentId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Nepodařilo se načíst detail studenta');
+  return response.json();
+}

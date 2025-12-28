@@ -12,6 +12,8 @@ import LessonPage from './pages/LessonPage';
 import AdminPage from './pages/AdminPage';
 import AdminCourseEditor from './pages/AdminCourseEditor';
 import AdminLessonEditor from './pages/AdminLessonEditor';
+import DashboardPage from './pages/DashboardPage';
+import StudentDetailPage from './pages/StudentDetailPage';
 import './App.css';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -85,6 +87,22 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <CourseDetailPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/prehled"
+        element={
+          <PrivateRoute>
+            <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/prehled/zak/:id"
+        element={
+          <PrivateRoute>
+            <StudentDetailPage />
           </PrivateRoute>
         }
       />

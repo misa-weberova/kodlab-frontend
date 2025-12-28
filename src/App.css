@@ -499,6 +499,7 @@ body {
   font-family: var(--font-body);
   cursor: pointer;
   margin-top: 1.5rem;
+  text-decoration: none;
   transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -529,6 +530,7 @@ body {
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
+  text-decoration: none;
   transition: all var(--transition-fast);
 }
 
@@ -594,6 +596,30 @@ body {
 .user-info span {
   font-weight: 600;
   color: var(--color-gray-dark);
+}
+
+.avatar-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--color-teal);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.avatar-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.avatar-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
 .home-content {
@@ -2239,6 +2265,498 @@ body {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+}
+
+/* Dashboard Styles */
+.dashboard-page {
+  padding: 0;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--color-black);
+}
+
+.group-selector {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  background: var(--color-white);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.group-selector:focus {
+  outline: none;
+  border-color: var(--color-teal);
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-teal);
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--color-gray);
+}
+
+.dashboard-section {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-section h3 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  margin: 0 0 1rem 0;
+  color: var(--color-black);
+}
+
+.section-hint {
+  font-size: 0.875rem;
+  color: var(--color-gray);
+  margin-bottom: 1rem;
+}
+
+.empty-hint {
+  color: var(--color-gray);
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Students Progress Table */
+.students-progress-table {
+  overflow-x: auto;
+}
+
+.students-progress-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.students-progress-table th,
+.students-progress-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.students-progress-table th {
+  font-weight: 600;
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+.students-progress-table tr:last-child td {
+  border-bottom: none;
+}
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-avatar {
+  font-size: 1.5rem;
+}
+
+.student-email {
+  font-weight: 500;
+}
+
+.date-cell {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+/* Dashboard Progress Bar */
+.dashboard-progress-bar {
+  position: relative;
+  background: var(--color-gray-light);
+  border-radius: 4px;
+  height: 24px;
+  min-width: 120px;
+  overflow: hidden;
+}
+
+.dashboard-progress-bar .fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-teal), #2DD4BF);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.dashboard-progress-bar .text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+/* Score Badges */
+.score-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.score-badge.large {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.score-badge.small {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+}
+
+.score-good {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.score-medium {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.score-low {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.completion-badge {
+  background: var(--color-gray-light);
+  color: var(--color-gray-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.pending-badge {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+.attempts-badge {
+  background: var(--color-gray-light);
+  color: var(--color-gray);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}
+
+/* Hardest Exercises List */
+.hardest-exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hardest-exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+}
+
+.exercise-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.exercise-type-badge {
+  background: var(--color-gray-light);
+  color: var(--color-gray-dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.exercise-type-badge.small {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
+}
+
+.exercise-title {
+  font-weight: 500;
+}
+
+.exercise-location {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+.exercise-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.completion-info {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+/* Student Detail Page */
+.student-detail-page {
+  padding: 0;
+}
+
+.back-link {
+  display: inline-block;
+  color: var(--color-teal);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.student-avatar-large {
+  font-size: 4rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-teal), #2DD4BF);
+  border-radius: 50%;
+}
+
+.student-info h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.student-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.activity-info {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+/* Course Progress Cards */
+.courses-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-progress-card {
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  background: var(--color-background);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+}
+
+.course-header:hover {
+  background: var(--color-gray-light);
+}
+
+.course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.course-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.course-stats {
+  color: var(--color-gray);
+  font-size: 0.875rem;
+}
+
+.course-score {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.expand-icon {
+  color: var(--color-gray);
+  font-size: 0.75rem;
+}
+
+.exercises-list {
+  border-top: 1px solid var(--color-gray-light);
+}
+
+.exercise-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.exercise-row:last-child {
+  border-bottom: none;
+}
+
+.exercise-row.pending {
+  opacity: 0.6;
+}
+
+.exercise-row .exercise-info {
+  gap: 0.5rem;
+}
+
+.exercise-lesson {
+  color: var(--color-gray);
+  font-size: 0.75rem;
+}
+
+.exercise-result {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.completed-date {
+  color: var(--color-gray);
+  font-size: 0.75rem;
+}
+
+.btn-small {
+  padding: 0.375rem 0.75rem;
+  background: var(--color-gray-light);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-dark);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.btn-small:hover {
+  background: var(--color-gray);
+  color: var(--color-white);
+}
+
+/* Responsive Dashboard */
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .group-selector {
+    width: 100%;
+  }
+
+  .student-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .student-stats {
+    justify-content: center;
+  }
+
+  .hardest-exercise-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .exercise-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }
 

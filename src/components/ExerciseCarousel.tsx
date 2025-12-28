@@ -10,13 +10,17 @@ interface ExerciseInfo {
 interface ExerciseCarouselProps {
   children: React.ReactNode;
   titles?: string[];
+  exerciseIds?: number[];
   onAllComplete?: (totalScore: number, totalPossible: number) => void;
+  onExerciseComplete?: (exerciseId: number, score: number, maxScore: number) => void;
 }
 
 export default function ExerciseCarousel({
   children,
   titles,
+  exerciseIds,
   onAllComplete,
+  onExerciseComplete,
 }: ExerciseCarouselProps) {
   const childArray = Children.toArray(children).filter(isValidElement);
   const exerciseCount = childArray.length;
@@ -33,6 +37,12 @@ export default function ExerciseCarousel({
 
   // Handle exercise completion
   const handleExerciseComplete = useCallback((index: number, _isCorrect: boolean, score: number, total: number) => {
+    // Call the onExerciseComplete callback if exercise has an ID
+    const exerciseId = exerciseIds?.[index];
+    if (onExerciseComplete && exerciseId && exerciseId > 0) {
+      onExerciseComplete(exerciseId, score, total);
+    }
+
     setExercises(prev => {
       const updated = [...prev];
       updated[index] = {
@@ -58,7 +68,7 @@ export default function ExerciseCarousel({
         setCurrentIndex(index + 1);
       }, 1500);
     }
-  }, [exerciseCount, onAllComplete]);
+  }, [exerciseCount, exerciseIds, onAllComplete, onExerciseComplete]);
 
   // Scroll to exercise area
   const scrollToExercise = () => {

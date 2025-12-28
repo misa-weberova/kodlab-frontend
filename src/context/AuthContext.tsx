@@ -4,13 +4,15 @@ import type { ReactNode } from 'react';
 interface User {
   userId: number;
   role: string;
+  avatar: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, userId: number, role: string) => void;
+  login: (token: string, userId: number, role: string, avatar: string | null) => void;
   logout: () => void;
+  updateAvatar: (avatar: string) => void;
   isLoading: boolean;
 }
 
@@ -32,8 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, userId: number, role: string) => {
-    const userData = { userId, role };
+  const login = (token: string, userId: number, role: string, avatar: string | null) => {
+    const userData = { userId, role, avatar };
     setToken(token);
     setUser(userData);
     localStorage.setItem('token', token);
@@ -47,8 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
+  const updateAvatar = (avatar: string) => {
+    if (user) {
+      const updatedUser = { ...user, avatar };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateAvatar, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

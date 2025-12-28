@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     try {
       const response = await apiLogin({ email, password });
-      login(response.token, response.userId, response.role);
+      login(response.token, response.userId, response.role, response.avatar);
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Něco se pokazilo');

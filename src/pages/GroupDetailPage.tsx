@@ -116,6 +116,7 @@ export default function GroupDetailPage() {
           <Logo />
           <nav className="header-nav">
             <Link to="/" className="nav-link">Domů</Link>
+            <Link to="/prehled" className="nav-link">Přehled</Link>
             <Link to="/skupiny" className="nav-link active">Skupiny</Link>
             <Link to="/kurzy" className="nav-link">Kurzy</Link>
           </nav>
@@ -138,6 +139,7 @@ export default function GroupDetailPage() {
           <Logo />
           <nav className="header-nav">
             <Link to="/" className="nav-link">Domů</Link>
+            <Link to="/prehled" className="nav-link">Přehled</Link>
             <Link to="/skupiny" className="nav-link active">Skupiny</Link>
             <Link to="/kurzy" className="nav-link">Kurzy</Link>
           </nav>
@@ -160,6 +162,7 @@ export default function GroupDetailPage() {
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
+          <Link to="/prehled" className="nav-link">Přehled</Link>
           <Link to="/skupiny" className="nav-link active">Skupiny</Link>
           <Link to="/kurzy" className="nav-link">Kurzy</Link>
         </nav>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLessonDetail, markLessonComplete } from '../api/courses';
+import { getLessonDetail, markLessonComplete, submitExerciseProgress } from '../api/courses';
 import type { LessonDetail, ExerciseData } from '../api/courses';
 import Logo from '../components/Logo';
 import CodeEditor from '../components/CodeEditor';
@@ -179,12 +179,29 @@ export default function LessonPage() {
     ];
   }, [lesson]);
 
+  // Memoize exercise IDs (0 for lesson content, then actual IDs)
+  const exerciseIds = useMemo(() => {
+    if (!lesson) return [0];
+    return [0, ...lesson.exercises.map((ex) => ex.id)];
+  }, [lesson]);
+
+  // Handle exercise completion - submit progress to backend
+  const handleExerciseComplete = async (exerciseId: number, score: number, maxScore: number) => {
+    if (!token || exerciseId <= 0) return;
+    try {
+      await submitExerciseProgress(token, exerciseId, score, maxScore);
+    } catch (err) {
+      console.error('Failed to save exercise progress:', err);
+    }
+  };
+
   return (
     <div className="home-page">
       <header className="home-header">
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
+          {isTeacher && <Link to="/prehled" className="nav-link">Přehled</Link>}
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
           {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}
@@ -212,6 +229,8 @@ export default function LessonPage() {
 
             <ExerciseCarousel
               titles={exerciseTitles}
+              exerciseIds={exerciseIds}
+              onExerciseComplete={handleExerciseComplete}
               onAllComplete={(totalScore, totalPossible) => {
                 console.log(`Všechna cvičení dokončena! Skóre: ${totalScore}/${totalPossible}`);
               }}

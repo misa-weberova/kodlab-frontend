@@ -1,22 +1,36 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getStudents } from '../api/auth';
+import { getStudents, updateAvatar } from '../api/auth';
 import { getCourses } from '../api/courses';
 import type { Student } from '../api/auth';
 import type { CourseListItem } from '../api/courses';
 import Logo from '../components/Logo';
 import ProgressBar from '../components/ProgressBar';
+import AvatarPicker, { getAvatarEmoji } from '../components/AvatarPicker';
 
 export default function HomePage() {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, updateAvatar: updateAvatarContext } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [courses, setCourses] = useState<CourseListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const isTeacher = user?.role === 'TEACHER';
   const isAdmin = user?.role === 'ADMIN';
+  const isStudent = user?.role === 'STUDENT';
+
+  const handleAvatarSelect = async (avatarId: string) => {
+    if (!token) return;
+    try {
+      await updateAvatar(token, avatarId);
+      updateAvatarContext(avatarId);
+      setShowAvatarPicker(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nepodařilo se uložit avatar');
+    }
+  };
 
   useEffect(() => {
     if (token) {
@@ -45,11 +59,21 @@ export default function HomePage() {
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link active">Domů</Link>
+          {isTeacher && <Link to="/prehled" className="nav-link">Přehled</Link>}
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
           {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}
         </nav>
         <div className="user-info">
+          {isStudent && (
+            <button
+              className="avatar-button"
+              onClick={() => setShowAvatarPicker(true)}
+              title="Změnit avatar"
+            >
+              <span className="avatar-emoji">{getAvatarEmoji(user?.avatar || null)}</span>
+            </button>
+          )}
           <span>{isAdmin ? 'Admin' : isTeacher ? 'Učitel' : 'Žák'}</span>
           <button onClick={logout} className="btn-secondary">
             Odhlásit se
@@ -128,6 +152,14 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {showAvatarPicker && (
+        <AvatarPicker
+          currentAvatar={user?.avatar || null}
+          onSelect={handleAvatarSelect}
+          onClose={() => setShowAvatarPicker(false)}
+        />
+      )}
     </div>
   );
 }
