@@ -10,6 +10,16 @@ import GapFillExercise from '../components/GapFillExercise';
 import CrosswordExercise from '../components/CrosswordExercise';
 import SortingExercise from '../components/SortingExercise';
 import CategorySortExercise from '../components/CategorySortExercise';
+import BlocklyExercise from '../components/BlocklyExercise';
+import type { BlocklyExerciseConfig } from '../components/BlocklyExercise';
+import PasswordStrengthExercise from '../components/PasswordStrengthExercise';
+import PhishingDetectorExercise from '../components/PhishingDetectorExercise';
+import UrlSafetyExercise from '../components/UrlSafetyExercise';
+import PrivacyQuizExercise from '../components/PrivacyQuizExercise';
+import RobotMazeExercise from '../components/RobotMazeExercise';
+import DataDetectiveExercise from '../components/DataDetectiveExercise';
+import ShortcutMasterExercise from '../components/ShortcutMasterExercise';
+import BinaryDecoderExercise from '../components/BinaryDecoderExercise';
 import ExerciseCarousel from '../components/ExerciseCarousel';
 
 // Parse exercise config safely
@@ -114,6 +124,107 @@ function renderExercise(exercise: ExerciseData): React.ReactNode {
         />
       );
 
+    case 'BLOCKLY':
+      return (
+        <BlocklyExercise
+          key={exercise.id}
+          config={config as BlocklyExerciseConfig}
+          title={exercise.title || 'Bloky'}
+          instruction={exercise.instruction || 'Sestav program pomocí bloků.'}
+        />
+      );
+
+    case 'PASSWORD':
+      return (
+        <PasswordStrengthExercise
+          key={exercise.id}
+          config={{
+            minStrength: (config.minStrength as number) || 60,
+            showHackTime: (config.showHackTime as boolean) ?? true,
+            showTips: (config.showTips as boolean) ?? true,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'PHISHING':
+      return (
+        <PhishingDetectorExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'URL_SAFETY':
+      return (
+        <UrlSafetyExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'PRIVACY':
+      return (
+        <PrivacyQuizExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'ROBOT_MAZE':
+      return (
+        <RobotMazeExercise
+          key={exercise.id}
+          config={{
+            requiredCompleted: config.requiredCompleted as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'DATA_DETECTIVE':
+      return (
+        <DataDetectiveExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'SHORTCUT':
+      return (
+        <ShortcutMasterExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+            showKeyboard: (config.showKeyboard as boolean) ?? true,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
+    case 'BINARY':
+      return (
+        <BinaryDecoderExercise
+          key={exercise.id}
+          config={{
+            requiredCorrect: config.requiredCorrect as number,
+          }}
+          onComplete={() => {}}
+        />
+      );
+
     default:
       return (
         <div key={exercise.id} className="unknown-exercise">
@@ -202,6 +313,7 @@ export default function LessonPage() {
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
           {isTeacher && <Link to="/prehled" className="nav-link">Přehled</Link>}
+          {isTeacher && <Link to="/rvp" className="nav-link">RVP</Link>}
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
           {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}
@@ -320,6 +432,24 @@ function getDefaultTitle(type: string): string {
       return 'Řazení';
     case 'CATEGORY':
       return 'Třídění';
+    case 'BLOCKLY':
+      return 'Bloky';
+    case 'PASSWORD':
+      return 'Síla hesla';
+    case 'PHISHING':
+      return 'Rozpoznej phishing';
+    case 'URL_SAFETY':
+      return 'Bezpečné odkazy';
+    case 'PRIVACY':
+      return 'Soukromí';
+    case 'ROBOT_MAZE':
+      return 'Robot v bludišti';
+    case 'DATA_DETECTIVE':
+      return 'Datový detektiv';
+    case 'SHORTCUT':
+      return 'Klávesové zkratky';
+    case 'BINARY':
+      return 'Binární kód';
     default:
       return 'Cvičení';
   }

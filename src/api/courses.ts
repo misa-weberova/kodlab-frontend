@@ -4,6 +4,7 @@ export interface CourseListItem {
   id: number;
   title: string;
   description: string | null;
+  rvpCategory: string | null;
   assigned: boolean;
   totalLessons: number;
   completedLessons: number;

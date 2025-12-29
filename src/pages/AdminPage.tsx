@@ -91,7 +91,8 @@ export default function AdminPage() {
         <Logo />
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
-          <Link to="/admin" className="nav-link active">Admin</Link>
+          <Link to="/admin" className="nav-link active">Kurzy</Link>
+          <Link to="/admin/blog" className="nav-link">Blog</Link>
         </nav>
         <div className="user-info">
           <span>Admin</span>

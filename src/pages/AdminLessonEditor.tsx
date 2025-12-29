@@ -13,7 +13,7 @@ import { getLessonDetail } from '../api/courses';
 import type { LessonDetail } from '../api/courses';
 import Logo from '../components/Logo';
 
-type ExerciseType = 'CODE' | 'MATCHING' | 'GAPFILL' | 'CROSSWORD' | 'SORTING' | 'CATEGORY';
+type ExerciseType = 'CODE' | 'MATCHING' | 'GAPFILL' | 'CROSSWORD' | 'SORTING' | 'CATEGORY' | 'BLOCKLY' | 'PASSWORD' | 'PHISHING' | 'URL_SAFETY' | 'PRIVACY' | 'ROBOT_MAZE' | 'DATA_DETECTIVE' | 'SHORTCUT' | 'BINARY';
 
 const exerciseTypeLabels: Record<ExerciseType, string> = {
   CODE: 'Programování',
@@ -22,6 +22,15 @@ const exerciseTypeLabels: Record<ExerciseType, string> = {
   CROSSWORD: 'Křížovka',
   SORTING: 'Řazení',
   CATEGORY: 'Třídění do kategorií',
+  BLOCKLY: 'Bloky (vizuální programování)',
+  PASSWORD: 'Test síly hesla',
+  PHISHING: 'Rozpoznej phishing',
+  URL_SAFETY: 'Bezpečnost odkazů',
+  PRIVACY: 'Kvíz o soukromí',
+  ROBOT_MAZE: 'Robot v bludišti',
+  DATA_DETECTIVE: 'Datový detektiv',
+  SHORTCUT: 'Klávesové zkratky',
+  BINARY: 'Binární kód',
 };
 
 export default function AdminLessonEditor() {
@@ -321,6 +330,48 @@ function getDefaultConfig(type: ExerciseType): ExerciseConfig {
           { id: '2', text: 'Položka 2', correctCategoryId: '2' },
         ],
       };
+    case 'BLOCKLY':
+      return {
+        expectedOutput: 'Hello World',
+        hints: ['Použij blok "vypiš"', 'Přidej text "Hello World"'],
+        mode: 'free',
+        maxBlocks: 0,
+      };
+    case 'PASSWORD':
+      return {
+        minStrength: 60,
+        showHackTime: true,
+        showTips: true,
+      };
+    case 'PHISHING':
+      return {
+        requiredCorrect: 4,
+      };
+    case 'URL_SAFETY':
+      return {
+        requiredCorrect: 6,
+      };
+    case 'PRIVACY':
+      return {
+        requiredCorrect: 8,
+      };
+    case 'ROBOT_MAZE':
+      return {
+        requiredCompleted: 3,
+      };
+    case 'DATA_DETECTIVE':
+      return {
+        requiredCorrect: 8,
+      };
+    case 'SHORTCUT':
+      return {
+        requiredCorrect: 8,
+        showKeyboard: true,
+      };
+    case 'BINARY':
+      return {
+        requiredCorrect: 6,
+      };
     default:
       return {};
   }
@@ -449,6 +500,24 @@ function ExerciseConfigurator({ type, config, onChange }: ExerciseConfiguratorPr
       return <SortingExerciseConfig config={config} onChange={onChange} />;
     case 'CATEGORY':
       return <CategoryExerciseConfig config={config} onChange={onChange} />;
+    case 'BLOCKLY':
+      return <BlocklyExerciseConfig config={config} onChange={onChange} />;
+    case 'PASSWORD':
+      return <PasswordExerciseConfig config={config} onChange={onChange} />;
+    case 'PHISHING':
+      return <SecurityExerciseConfig config={config} onChange={onChange} type="phishing" />;
+    case 'URL_SAFETY':
+      return <SecurityExerciseConfig config={config} onChange={onChange} type="url" />;
+    case 'PRIVACY':
+      return <SecurityExerciseConfig config={config} onChange={onChange} type="privacy" />;
+    case 'ROBOT_MAZE':
+      return <RobotMazeConfig config={config} onChange={onChange} />;
+    case 'DATA_DETECTIVE':
+      return <DataDetectiveConfig config={config} onChange={onChange} />;
+    case 'SHORTCUT':
+      return <ShortcutConfig config={config} onChange={onChange} />;
+    case 'BINARY':
+      return <BinaryConfig config={config} onChange={onChange} />;
     default:
       return <div>Neznámý typ cvičení</div>;
   }
@@ -903,6 +972,351 @@ function CategoryExerciseConfig({
       >
         + Přidat položku
       </button>
+    </div>
+  );
+}
+
+// Blockly Exercise Config
+function BlocklyExerciseConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  const hints = config.hints || [];
+
+  const updateHint = (index: number, value: string) => {
+    const newHints = [...hints];
+    newHints[index] = value;
+    onChange({ ...config, hints: newHints });
+  };
+
+  const addHint = () => {
+    onChange({ ...config, hints: [...hints, ''] });
+  };
+
+  const removeHint = (index: number) => {
+    onChange({ ...config, hints: hints.filter((_, i) => i !== index) });
+  };
+
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Očekávaný výstup programu</label>
+        <textarea
+          value={config.expectedOutput || ''}
+          onChange={(e) => onChange({ ...config, expectedOutput: e.target.value })}
+          rows={2}
+          placeholder="Text, který by měl program vypsat (např. Hello World)"
+        />
+        <p className="config-hint">
+          Program studenta je správný, pokud vypíše přesně tento text.
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label>Maximální počet bloků (0 = neomezeno)</label>
+        <input
+          type="number"
+          value={config.maxBlocks || 0}
+          onChange={(e) => onChange({ ...config, maxBlocks: parseInt(e.target.value) || 0 })}
+          min={0}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Nápovědy pro studenty</label>
+        <div className="hints-list">
+          {hints.map((hint, index) => (
+            <div key={index} className="hint-row">
+              <span className="hint-number">{index + 1}.</span>
+              <input
+                type="text"
+                value={hint}
+                onChange={(e) => updateHint(index, e.target.value)}
+                placeholder="Text nápovědy..."
+              />
+              <button
+                type="button"
+                className="btn-danger btn-small"
+                onClick={() => removeHint(index)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+        <button type="button" className="btn-secondary btn-small" onClick={addHint}>
+          + Přidat nápovědu
+        </button>
+      </div>
+
+      <div className="form-group">
+        <label>Testovací vstupy (pro cvičení s vstupem, oddělené novým řádkem)</label>
+        <textarea
+          value={(config.testInputs || []).join('\n')}
+          onChange={(e) =>
+            onChange({
+              ...config,
+              testInputs: e.target.value.split('\n').filter(Boolean),
+            })
+          }
+          rows={3}
+          placeholder="Volitelné: vstupy pro testování programu"
+        />
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Studenti budou skládat program z vizuálních bloků podobných Scratch.
+        K dispozici mají bloky pro výpis textu, matematiku, cykly a podmínky.
+      </div>
+    </div>
+  );
+}
+
+// Password Strength Exercise Config
+function PasswordExerciseConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Minimální síla hesla pro splnění (%)</label>
+        <input
+          type="number"
+          value={config.minStrength || 60}
+          onChange={(e) => onChange({ ...config, minStrength: parseInt(e.target.value) || 60 })}
+          min={0}
+          max={100}
+        />
+        <p className="config-hint">
+          Student musí vytvořit heslo s touto minimální silou pro splnění cvičení.
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={config.showHackTime !== false}
+            onChange={(e) => onChange({ ...config, showHackTime: e.target.checked })}
+          />
+          Zobrazit odhadovaný čas na prolomení
+        </label>
+      </div>
+
+      <div className="form-group">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={config.showTips !== false}
+            onChange={(e) => onChange({ ...config, showTips: e.target.checked })}
+          />
+          Zobrazit tipy pro silné heslo
+        </label>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Toto cvičení učí děti vytvářet silná hesla.
+        Ukazuje jim, jak rychle by hacker mohl slabé heslo prolomit.
+      </div>
+    </div>
+  );
+}
+
+// Security Exercise Config (Phishing, URL Safety, Privacy)
+function SecurityExerciseConfig({
+  config,
+  onChange,
+  type,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+  type: 'phishing' | 'url' | 'privacy';
+}) {
+  const typeInfo = {
+    phishing: {
+      label: 'Počet správných odpovědí pro splnění',
+      total: 5,
+      description: 'Cvičení obsahuje 5 emailů (phishing i legitimní). Studenti je musí správně rozpoznat.',
+    },
+    url: {
+      label: 'Počet správných odpovědí pro splnění',
+      total: 8,
+      description: 'Cvičení obsahuje 8 odkazů. Studenti hodnotí, zda jsou bezpečné nebo podezřelé.',
+    },
+    privacy: {
+      label: 'Počet správných odpovědí pro splnění',
+      total: 12,
+      description: 'Cvičení obsahuje 12 položek. Studenti určují, co je bezpečné sdílet online.',
+    },
+  };
+
+  const info = typeInfo[type];
+
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>{info.label}</label>
+        <input
+          type="number"
+          value={config.requiredCorrect || Math.ceil(info.total * 0.8)}
+          onChange={(e) => onChange({ ...config, requiredCorrect: parseInt(e.target.value) || 1 })}
+          min={1}
+          max={info.total}
+        />
+        <p className="config-hint">
+          Maximum: {info.total} otázek
+        </p>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> {info.description}
+      </div>
+    </div>
+  );
+}
+
+// Robot Maze Exercise Config
+function RobotMazeConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Počet bludišť pro splnění</label>
+        <input
+          type="number"
+          value={config.requiredCompleted || 3}
+          onChange={(e) => onChange({ ...config, requiredCompleted: parseInt(e.target.value) || 3 })}
+          min={1}
+          max={3}
+        />
+        <p className="config-hint">
+          Cvičení obsahuje 3 bludiště s rostoucí obtížností.
+        </p>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Studenti ovládají robota pomocí příkazů: Vpřed, Vlevo, Vpravo.
+        Učí se základům algoritmického myšlení a plánování.
+      </div>
+    </div>
+  );
+}
+
+// Data Detective Exercise Config
+function DataDetectiveConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Počet správných odpovědí pro splnění</label>
+        <input
+          type="number"
+          value={config.requiredCorrect || 8}
+          onChange={(e) => onChange({ ...config, requiredCorrect: parseInt(e.target.value) || 8 })}
+          min={1}
+          max={10}
+        />
+        <p className="config-hint">
+          Cvičení obsahuje 3 datasety s celkem 10 otázkami.
+        </p>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Studenti analyzují tabulky s daty a odpovídají na otázky.
+        Učí se čtení dat, sčítání, průměrování a vyhledávání.
+      </div>
+    </div>
+  );
+}
+
+// Shortcut Master Exercise Config
+function ShortcutConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Počet správných zkratek pro splnění</label>
+        <input
+          type="number"
+          value={config.requiredCorrect || 8}
+          onChange={(e) => onChange({ ...config, requiredCorrect: parseInt(e.target.value) || 8 })}
+          min={1}
+          max={10}
+        />
+        <p className="config-hint">
+          Cvičení obsahuje 10 klávesových zkratek (Ctrl+C, Ctrl+V, ...).
+        </p>
+      </div>
+
+      <div className="form-group">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={config.showKeyboard !== false}
+            onChange={(e) => onChange({ ...config, showKeyboard: e.target.checked })}
+          />
+          Zobrazit stisknuté klávesy
+        </label>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Studenti se učí používat klávesové zkratky.
+        Zobrazí se akce a student musí stisknout správnou kombinaci kláves.
+      </div>
+    </div>
+  );
+}
+
+// Binary Decoder Exercise Config
+function BinaryConfig({
+  config,
+  onChange,
+}: {
+  config: ExerciseConfig;
+  onChange: (c: ExerciseConfig) => void;
+}) {
+  return (
+    <div className="exercise-config">
+      <div className="form-group">
+        <label>Počet správných odpovědí pro splnění</label>
+        <input
+          type="number"
+          value={config.requiredCorrect || 6}
+          onChange={(e) => onChange({ ...config, requiredCorrect: parseInt(e.target.value) || 6 })}
+          min={1}
+          max={8}
+        />
+        <p className="config-hint">
+          Cvičení obsahuje 8 úkolů (převody a dekódování zpráv).
+        </p>
+      </div>
+
+      <div className="blockly-preview-note">
+        <strong>Tip:</strong> Studenti převádí čísla mezi binární a desítkovou soustavou.
+        Učí se, jak počítače reprezentují data pomocí nul a jedniček.
+      </div>
     </div>
   );
 }

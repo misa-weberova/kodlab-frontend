@@ -85,6 +85,7 @@ export default function CoursesPage() {
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
           {isTeacher && <Link to="/prehled" className="nav-link">Přehled</Link>}
+          {isTeacher && <Link to="/rvp" className="nav-link">RVP</Link>}
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           <Link to="/kurzy" className="nav-link active">Kurzy</Link>
         </nav>

@@ -84,6 +84,7 @@ export default function StudentDetailPage() {
       case 'CROSSWORD': return 'Křížovka';
       case 'SORTING': return 'Řazení';
       case 'CATEGORY': return 'Třídění';
+      case 'BLOCKLY': return 'Bloky';
       default: return type;
     }
   };
@@ -95,6 +96,7 @@ export default function StudentDetailPage() {
         <nav className="header-nav">
           <Link to="/" className="nav-link">Domů</Link>
           {isTeacher && <Link to="/prehled" className="nav-link">Přehled</Link>}
+          {isTeacher && <Link to="/rvp" className="nav-link">RVP</Link>}
           {isTeacher && <Link to="/skupiny" className="nav-link">Skupiny</Link>}
           {isTeacher && <Link to="/kurzy" className="nav-link">Kurzy</Link>}
           {isAdmin && <Link to="/admin" className="nav-link">Admin</Link>}

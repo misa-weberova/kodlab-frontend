@@ -19,6 +19,7 @@ export default function LandingPage() {
         <nav className="landing-nav">
           <a href="#jak-to-funguje" className="nav-text-link">Jak to funguje</a>
           <a href="#cenik" className="nav-text-link">Ceník</a>
+          <Link to="/blog" className="nav-text-link">Blog</Link>
           <Link to="/prihlaseni" className="btn-secondary">Přihlásit se</Link>
           <Link to="/registrace" className="btn-primary landing-cta-small">Vyzkoušet zdarma</Link>
         </nav>
@@ -476,6 +477,7 @@ export default function LandingPage() {
           <a href="mailto:info@kodlab.cz">Kontakt</a>
           <a href="#cenik">Ceník</a>
           <a href="#jak-to-funguje">Jak to funguje</a>
+          <Link to="/blog">Blog</Link>
         </div>
         <div className="footer-legal">
           <p>© 2025 KodLab. Všechna práva vyhrazena.</p>

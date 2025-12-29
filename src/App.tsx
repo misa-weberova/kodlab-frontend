@@ -14,6 +14,11 @@ import AdminCourseEditor from './pages/AdminCourseEditor';
 import AdminLessonEditor from './pages/AdminLessonEditor';
 import DashboardPage from './pages/DashboardPage';
 import StudentDetailPage from './pages/StudentDetailPage';
+import RvpPage from './pages/RvpPage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
+import AdminBlogPage from './pages/AdminBlogPage';
+import AdminBlogEditor from './pages/AdminBlogEditor';
 import './App.css';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -107,6 +112,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/rvp"
+        element={
+          <PrivateRoute>
+            <RvpPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/lekce/:id"
         element={
           <PrivateRoute>
@@ -154,6 +167,24 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/admin/blog"
+        element={
+          <PrivateRoute>
+            <AdminBlogPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/blog/:id"
+        element={
+          <PrivateRoute>
+            <AdminBlogEditor />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:slug" element={<BlogPostPage />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

@@ -24,6 +24,7 @@ export default function AdminCourseEditor() {
   // Edit state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [rvpCategory, setRvpCategory] = useState<string | null>(null);
 
   // New chapter form
   const [showNewChapter, setShowNewChapter] = useState(false);
@@ -58,6 +59,7 @@ export default function AdminCourseEditor() {
         setCourse(found);
         setTitle(found.title);
         setDescription(found.description || '');
+        setRvpCategory(found.rvpCategory || null);
         // Expand all chapters by default
         setExpandedChapters(new Set(found.chapters.map((c) => c.id)));
       } else {
@@ -77,6 +79,7 @@ export default function AdminCourseEditor() {
       await updateCourse(token, course.id, {
         title: title.trim(),
         description: description.trim() || null,
+        rvpCategory: rvpCategory,
       });
       await loadCourse();
     } catch (err) {
@@ -196,6 +199,20 @@ export default function AdminCourseEditor() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                 />
+              </div>
+              <div className="form-group">
+                <label htmlFor="rvpCategory">Kategorie RVP</label>
+                <select
+                  id="rvpCategory"
+                  value={rvpCategory || ''}
+                  onChange={(e) => setRvpCategory(e.target.value || null)}
+                >
+                  <option value="">-- Bez kategorie --</option>
+                  <option value="DATA">Data, informace a modelování</option>
+                  <option value="ALGORITHMS">Algoritmizace a programování</option>
+                  <option value="SYSTEMS">Informační systémy</option>
+                  <option value="DIGITAL_TECH">Digitální technologie</option>
+                </select>
               </div>
               <div className="form-actions">
                 <button

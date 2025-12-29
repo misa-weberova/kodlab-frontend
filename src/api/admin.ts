@@ -1,5 +1,33 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+// ==================== STATS ====================
+
+export interface AdminStats {
+  totalUsers: number;
+  students: number;
+  teachers: number;
+  admins: number;
+  organizations: number;
+  totalCourses: number;
+  publishedCourses: number;
+  totalExercises: number;
+  completedLessons: number;
+  completedExercises: number;
+  totalBlogPosts: number;
+  publishedBlogPosts: number;
+}
+
+export async function getAdminStats(token: string): Promise<AdminStats> {
+  const response = await fetch(`${API_URL}/api/admin/stats`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    if (response.status === 403) throw new Error('Přístup pouze pro administrátory');
+    throw new Error('Nepodařilo se načíst statistiky');
+  }
+  return response.json();
+}
+
 // ==================== TYPES ====================
 
 export interface ExerciseConfig {
@@ -22,6 +50,17 @@ export interface ExerciseConfig {
   // Category sort exercise
   categories?: { id: string; title: string; color?: string }[];
   categoryItems?: { id: string; text: string; correctCategoryId: string }[];
+  // Blockly exercise
+  hints?: string[];
+  maxBlocks?: number;
+  mode?: 'free' | 'fix_bug' | 'complete';
+  initialBlocks?: string;
+  allowedBlocks?: string[];
+  testInputs?: string[];
+  // Password strength exercise
+  minStrength?: number;
+  showHackTime?: boolean;
+  showTips?: boolean;
 }
 
 export interface Exercise {
@@ -53,6 +92,7 @@ export interface Course {
   title: string;
   description: string | null;
   published: boolean;
+  rvpCategory: string | null;
   chapters: Chapter[];
 }
 
@@ -88,7 +128,7 @@ export async function createCourse(token: string, title: string, description: st
 export async function updateCourse(
   token: string,
   courseId: number,
-  data: { title?: string; description?: string | null; published?: boolean }
+  data: { title?: string; description?: string | null; published?: boolean; rvpCategory?: string | null }
 ): Promise<Course> {
   const response = await fetch(`${API_URL}/api/admin/courses/${courseId}`, {
     method: 'PUT',
@@ -114,6 +154,7 @@ export async function deleteCourse(token: string, courseId: number): Promise<voi
   if (!response.ok) {
     if (response.status === 403) throw new Error('Přístup pouze pro administrátory');
     if (response.status === 404) throw new Error('Kurz nenalezen');
+    if (response.status === 409) throw new Error('Nelze smazat kurz - obsahuje závislá data');
     throw new Error('Nepodařilo se smazat kurz');
   }
 }
